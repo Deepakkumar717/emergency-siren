@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Siren Detector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ff9d;
+            --secondary: #ff00aa;
+            --accent: #00e1ff;
+            --dark: #0a0a20;
+            --light: #f0f0ff;
+        }
+        
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            margin: 0;
+            padding: 0;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 157, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 0, 170, 0.1) 0%, transparent 20%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(0, 225, 255, 0.3);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--accent);
+        }
+        
+        .panel {
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px rgba(0, 225, 255, 0.1);
+            border: 1px solid rgba(0, 225, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .traffic-light {
+            width: 200px;
+            height: 500px;
+            background: #222;
+            border-radius: 30px;
+            margin: 2rem auto;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+            border: 5px solid #444;
+        }
+        
+        .light {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 20px auto;
+            position: relative;
+            background: #111;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s ease;
+        }
+        
+        .light::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 50%;
+            background: transparent;
+            box-shadow: 0 0 10px currentColor;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .light.active {
+            box-shadow: 0 0 30px currentColor, inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .light.active::after {
+            opacity: 0.7;
+        }
+        
+        .red {
+            background: #300;
+            color: #f00;
+        }
+        
+        .yellow {
+            background: #330;
+            color: #ff0;
+        }
+        
+        .green {
+            background: #030;
+            color: #0f0;
+        }
+        
+        .red.active {
+            background: #f00;
+        }
+        
+        .yellow.active {
+            background: #ff0;
+        }
+        
+        .green.active {
+            background: #0f0;
+        }
+        
+        .status-display {
+            font-size: 2rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .confidence {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin: 1rem 0;
+        }
+        
+        .detected-class {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin: 1rem 0;
+            text-transform: uppercase;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            color: var(--dark);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 225, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 225, 255, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, var(--secondary), #ff00cc);
+        }
+        
+        .media-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .media-box {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(30, 30, 60, 0.6);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .media-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+        
+        video, audio {
+            width: 100%;
+            border-radius: 10px;
+            background: #000;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(0, 255, 157, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px currentColor;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(0, 225, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .media-container {
+                flex-direction: column;
+            }
+            
+            .traffic-light {
+                width: 150px;
+                height: 400px;
+            }
+            
+            .light {
+                width: 90px;
+                height: 90px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EMERGENCY SIREN DETECTOR</h1>
+        <div class="subtitle">AI-powered traffic signal control system</div>
+        
+        <div class="panel">
+            <div class="media-container">
+                <div class="media-box">
+                    <div class="media-title">TRAFFIC LIGHT STATUS</div>
+                    <div class="traffic-light">
+                        <div class="light red" id="red-light"></div>
+                        <div class="light yellow" id="yellow-light"></div>
+                        <div class="light green" id="green-light"></div>
+                    </div>
+                    <div class="status-display" id="status-text">SYSTEM READY</div>
+                    <div class="confidence" id="confidence-text">-</div>
+                    <div class="detected-class" id="class-text">-</div>
+                </div>
+                
+                <div class="media-box">
+                    <div class="media-title">AUDIO INPUT</div>
+                    <audio id="audio-player" controls></audio>
+                    <button class="btn" id="audio-btn">UPLOAD TRAFFIC AUDIO</button>
+                    <input type="file" id="audio-input" accept="audio/*" class="hidden">
+                    
+                    <div class="media-title" style="margin-top: 2rem;">VIDEO INPUT</div>
+                    <video id="video-player" controls></video>
+                    <button class="btn btn-secondary" id="video-btn">UPLOAD TRAFFIC VIDEO</button>
+                    <input type="file" id="video-input" accept="video/*" class="hidden">
+                </div>
+            </div>
+            
+            <button class="btn pulse" id="analyze-btn" disabled>ANALYZE AUDIO</button>
+            <div id="loading" class="hidden">
+                <div class="loading"></div>
+                <span>Processing audio... This may take a few seconds</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const audioInput = document.getElementById('audio-input');
+        const videoInput = document.getElementById('video-input');
+        const audioBtn = document.getElementById('audio-btn');
+        const videoBtn = document.getElementById('video-btn');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const audioPlayer = document.getElementById('audio-player');
+        const videoPlayer = document.getElementById('video-player');
+        const loadingDiv = document.getElementById('loading');
+        
+        // Traffic light elements
+        const redLight = document.getElementById('red-light');
+        const yellowLight = document.getElementById('yellow-light');
+        const greenLight = document.getElementById('green-light');
+        const statusText = document.getElementById('status-text');
+        const confidenceText = document.getElementById('confidence-text');
+        const classText = document.getElementById('class-text');
+        
+        // Current audio file
+        let currentAudioFile = null;
+        
+        // Event listeners
+        audioBtn.addEventListener('click', () => audioInput.click());
+        videoBtn.addEventListener('click', () => videoInput.click());
+        
+        audioInput.addEventListener('change', handleAudioUpload);
+        videoInput.addEventListener('change', handleVideoUpload);
+        analyzeBtn.addEventListener('click', analyzeAudio);
+        
+        function handleAudioUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            currentAudioFile = file;
+            const url = URL.createObjectURL(file);
+            audioPlayer.src = url;
+            analyzeBtn.disabled = false;
+            
+            // Reset lights
+            resetLights();
+            statusText.textContent = "AUDIO LOADED";
+            confidenceText.textContent = "-";
+            classText.textContent = "-";
+        }
+        
+        function handleVideoUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const url = URL.createObjectURL(file);
+            videoPlayer.src = url;
+        }
+        
+        function resetLights() {
+            redLight.classList.remove('active');
+            yellowLight.classList.remove('active');
+            greenLight.classList.remove('active');
+        }
+        
+        function setLight(status) {
+            resetLights();
+            
+            if (status === 'red') {
+                redLight.classList.add('active');
+                statusText.textContent = "STOP - NO EMERGENCY DETECTED";
+                statusText.style.color = "#ff0000";
+            } else if (status === 'yellow') {
+                yellowLight.classList.add('active');
+                statusText.textContent = "CAUTION - SYSTEM PROCESSING";
+                statusText.style.color = "#ffff00";
+            } else {
+                greenLight.classList.add('active');
+                statusText.textContent = "CLEAR - EMERGENCY DETECTED";
+                statusText.style.color = "#00ff00";
+            }
+        }
+        
+        async function analyzeAudio() {
+            if (!currentAudioFile) return;
+            
+            // Show loading
+            analyzeBtn.disabled = true;
+            loadingDiv.classList.remove('hidden');
+            setLight('yellow');
+            
+            try {
+                const formData = new FormData();
+                formData.append('file', currentAudioFile);
+                
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    confidenceText.textContent = `Confidence: ${(result.confidence * 100).toFixed(2)}%`;
+                    classText.textContent = `Detected: ${result.class.toUpperCase()}`;
+                    
+                    if (result.class === "siren" && result.confidence >= 0.88) {
+                        setLight('green');
+                    } else {
+                        setLight('red');
+                    }
+                } else {
+                    statusText.textContent = "ERROR IN ANALYSIS";
+                    statusText.style.color = "#ff0000";
+                    confidenceText.textContent = result.message;
+                }
+            } catch (error) {
+                statusText.textContent = "NETWORK ERROR";
+                statusText.style.color = "#ff0000";
+                confidenceText.textContent = error.message;
+            } finally {
+                loadingDiv.classList.add('hidden');
+            }
+        }
+
+        // Initialize with demo mode if not connected to backend
+        window.addEventListener('load', () => {
+            // Check if we're connected to a backend
+            fetch('/')
+                .then(response => {
+                    if (!response.ok) {
+                        enableDemoMode();
+                    }
+                })
+                .catch(() => {
+                    enableDemoMode();
+                });
+        });
+
+        function enableDemoMode() {
+            console.log("Running in demo mode (no backend connection)");
+            
+            // Modify analyze function to use simulated responses
+            window.analyzeAudio = function() {
+                if (!currentAudioFile) return;
+                
+                // Show loading
+                analyzeBtn.disabled = true;
+                loadingDiv.classList.remove('hidden');
+                setLight('yellow');
+                
+                // Simulate backend processing delay
+                setTimeout(() => {
+                    const filename = currentAudioFile.name.toLowerCase();
+                    let result;
+                    
+                    if (filename.includes("siren") || filename.includes("emergency")) {
+                        result = {
+                            status: "success",
+                            class: "siren",
+                            confidence: Math.random() * 0.1 + 0.9,  // 90-100%
+                            message: "Emergency siren detected"
+                        };
+                    } else if (filename.includes("horn") || filename.includes("noise")) {
+                        result = {
+                            status: "success",
+                            class: "horn",
+                            confidence: Math.random() * 0.2 + 0.7,  // 70-90%
+                            message: "Vehicle horn detected"
+                        };
+                    } else {
+                        result = {
+                            status: "success",
+                            class: "normal",
+                            confidence: Math.random() * 0.5 + 0.5,  // 50-100%
+                            message: "Normal traffic noise"
+                        };
+                    }
+                    
+                    // Update UI
+                    confidenceText.textContent = `Confidence: ${(result.confidence * 100).toFixed(2)}%`;
+                    classText.textContent = `Detected: ${result.class.toUpperCase()}`;
+                    
+                    if (result.class === "siren" && result.confidence >= 0.88) {
+                        setLight('green');
+                    } else {
+                        setLight('red');
+                    }
+                    
+                    loadingDiv.classList.add('hidden');
+                }, 2000);
+            };
+            
+            // Show demo mode indicator
+            const demoIndicator = document.createElement('div');
+            demoIndicator.style.position = 'fixed';
+            demoIndicator.style.bottom = '10px';
+            demoIndicator.style.right = '10px';
+            demoIndicator.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
+            demoIndicator.style.color = 'white';
+            demoIndicator.style.padding = '5px 10px';
+            demoIndicator.style.borderRadius = '5px';
+            demoIndicator.style.zIndex = '1000';
+            demoIndicator.textContent = 'DEMO MODE (No backend connection)';
+            document.body.appendChild(demoIndicator);
+        }
+    </script>
+</body>
+</html>
